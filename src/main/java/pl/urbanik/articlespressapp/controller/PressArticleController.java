@@ -9,6 +9,7 @@ import pl.urbanik.articlespressapp.model.PressArticleDto;
 import pl.urbanik.articlespressapp.service.PressArticleService;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,6 +20,11 @@ public class PressArticleController {
 
     private final PressArticleService pressArticleService;
 
+
+    @GetMapping("/pressArticles")
+    public List<PressArticle> getAllPressArticles(){
+        return pressArticleService.getAllPressArticles();
+    }
 
     @GetMapping("/pressArticle/{id}")
     public PressArticle getPressArticle(@PathVariable Long id) {
