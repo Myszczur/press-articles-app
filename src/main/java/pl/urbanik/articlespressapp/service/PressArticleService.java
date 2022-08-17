@@ -39,7 +39,7 @@ public class PressArticleService {
     public List<PressArticle> getAllPressArticles() {
         return pressArticleRepository.findAll()
                 .stream()
-                .sorted(Comparator.comparing(PressArticle::getCreated))
+                .sorted(Comparator.comparing(PressArticle::getPublicationdate).reversed())
                 .collect(Collectors.toList());
     }
 

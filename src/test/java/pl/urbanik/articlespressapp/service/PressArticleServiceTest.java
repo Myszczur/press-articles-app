@@ -51,6 +51,9 @@ class PressArticleServiceTest {
         pressArticle.setCreated(Timestamp.valueOf(LocalDateTime.now()));
         pressArticle.setUpdated(Timestamp.valueOf(LocalDateTime.now()));
         pressArticleService.createPressArticle(pressArticle);
+        PressArticle pressArticle2 = pressArticleRepository.findById(1L).orElseThrow(EntityNotFoundException::new);
+        assertEquals("Kamil", pressArticle2.getAuthorfirstname());
+
     }
 
     @Test
@@ -74,7 +77,7 @@ class PressArticleServiceTest {
 
     @Test
     void testGetAllPressArticles() {
-       assertFalse(pressArticleService.getAllPressArticles().isEmpty());
+        assertFalse(pressArticleService.getAllPressArticles().isEmpty());
     }
 
     @Test
