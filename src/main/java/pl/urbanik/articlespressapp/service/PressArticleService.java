@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import pl.urbanik.articlespressapp.model.PressArticle;
 import pl.urbanik.articlespressapp.repository.PressArticleRepository;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,10 +19,12 @@ public class PressArticleService {
 
 
     public PressArticle createPressArticle(PressArticle pressArticle) {
+        pressArticle.setCreated(Timestamp.valueOf(LocalDateTime.now()));
         return pressArticleRepository.save(pressArticle);
     }
 
     public PressArticle updatePressArticle(PressArticle pressArticle) {
+        pressArticle.setUpdated(Timestamp.valueOf(LocalDateTime.now()));
         return pressArticleRepository.save(pressArticle);
     }
 
@@ -35,7 +39,14 @@ public class PressArticleService {
     public List<PressArticle> getAllPressArticles() {
         return pressArticleRepository.findAll()
                 .stream()
-                .sorted(Comparator.comparing(PressArticle::getCreated).reversed())
+                .sorted(Comparator.comparing(PressArticle::getCreated))
+                .collect(Collectors.toList());
+    }
+
+    public List<PressArticle> getAllPressArticlesByKeyWord(String keyWord) {
+        return pressArticleRepository.findAll()
+                .stream()
+                .filter(it -> it.getTitle().contains(keyWord) || it.getContents().contains(keyWord))
                 .collect(Collectors.toList());
     }
 }

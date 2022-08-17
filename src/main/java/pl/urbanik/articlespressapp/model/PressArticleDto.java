@@ -1,31 +1,21 @@
 package pl.urbanik.articlespressapp.model;
 
 import lombok.Getter;
+import lombok.Setter;
 
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
 @Getter
+@Setter
 public class PressArticleDto {
 
     private String title;
     private String contents;
-    private LocalDate publicationDate;
+    private Timestamp publicationdate;
     private String magazine;
-    private String authorFirstName;
-    private String authorLastName;
-    private LocalDateTime created;
-    private LocalDateTime updated;
+    private String authorfirstname;
+    private String authorlastname;
+    private Timestamp created;
+    private Timestamp updated;
 
-    @PreUpdate
-    public void preUpdate() {
-        updated = LocalDateTime.now();
-    }
-
-    @PrePersist
-    public void prePersist() {
-        created = LocalDateTime.now();
-    }
 }
