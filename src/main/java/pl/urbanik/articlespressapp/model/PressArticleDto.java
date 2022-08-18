@@ -17,5 +17,4 @@ public class PressArticleDto {
     private String authorlastname;
     private Timestamp created;
     private Timestamp updated;
-
 }

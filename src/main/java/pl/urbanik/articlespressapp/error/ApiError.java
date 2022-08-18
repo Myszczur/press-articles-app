@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
+
 @Getter
 @Setter
 public class ApiError {
@@ -26,5 +27,4 @@ public class ApiError {
         this.message = message;
         errors = List.of(error);
     }
-
 }

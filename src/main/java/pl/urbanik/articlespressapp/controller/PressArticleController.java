@@ -23,7 +23,6 @@ public class PressArticleController {
 
     private static final Long EMPTY_ID = null;
     private static final Timestamp EMPTY_UPDATED = null;
-
     private final PressArticleService pressArticleService;
 
 
