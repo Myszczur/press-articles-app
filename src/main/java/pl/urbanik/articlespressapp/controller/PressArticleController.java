@@ -12,6 +12,7 @@ import pl.urbanik.articlespressapp.service.PressArticleService;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -32,7 +33,8 @@ public class PressArticleController {
                 .map(it -> EntityModel.of(it,
                         linkTo(methodOn(PressArticleController.class).getPressArticle(it.getId())).withSelfRel()
                 ))
-                .toList();
+                .collect(Collectors.toList());
+
         return CollectionModel.of(pressArticleList,
                 linkTo(methodOn(PressArticleController.class).getAllPressArticles()).withSelfRel()
         );
