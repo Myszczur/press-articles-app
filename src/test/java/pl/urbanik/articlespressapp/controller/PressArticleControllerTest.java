@@ -1,42 +1,106 @@
 package pl.urbanik.articlespressapp.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.ui.Model;
 import pl.urbanik.articlespressapp.model.PressArticle;
+import pl.urbanik.articlespressapp.repository.PressArticleRepository;
 import pl.urbanik.articlespressapp.service.PressArticleService;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.BDDMockito.given;
 
-@WebMvcTest
+@ExtendWith(MockitoExtension.class)
 class PressArticleControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    private MockMvc mvc;
 
-    @MockBean
-    private PressArticleService pressArticleService;
-    private static ObjectMapper mapper = new ObjectMapper();
+    @Mock
+    private PressArticleService pressArticleRepository;
 
-    @BeforeAll
-    static List<PressArticle> beforeAllTests() {
+    @InjectMocks
+    private PressArticleController pressArticleController;
+
+    // This object will be magically initialized by the initFields method below.
+    private JacksonTester<PressArticle> jsonPressArticle;
+
+    @BeforeEach
+    public void setup() {
+        // We would need this line if we would not use the MockitoExtension
+        // MockitoAnnotations.initMocks(this);
+        // Here we can't use @AutoConfigureJsonTesters because there isn't a Spring context
+        JacksonTester.initFields(this, new ObjectMapper());
+        // MockMvc standalone approach
+        mvc = MockMvcBuilders.standaloneSetup(pressArticleController)
+                .build();
+    }
+
+    @Test
+    public void canRetrieveByIdWhenExists() throws Exception {
         PressArticle pressArticle = new PressArticle();
-        pressArticle.setId(2L);
+        PressArticle pressArticle2 = new PressArticle();
+        pressArticle.setId(6L);
+        pressArticle2.setId(6L);
+        pressArticle.setTitle("News");
+        pressArticle2.setTitle("News");
+        pressArticle.setContents("Contains of Title");
+        pressArticle2.setContents("Contains of Title");
+        pressArticle.setPublicationdate(Timestamp.valueOf(LocalDateTime.now()));
+        pressArticle2.setPublicationdate(Timestamp.valueOf(LocalDateTime.now()));
+        pressArticle.setAuthorfirstname("Kamil");
+        pressArticle2.setAuthorfirstname("Kamil");
+        pressArticle.setAuthorlastname("Urbanik");
+        pressArticle2.setAuthorlastname("Urbanik");
+        pressArticle.setCreated(Timestamp.valueOf(LocalDateTime.now()));
+        pressArticle2.setCreated(Timestamp.valueOf(LocalDateTime.now()));
+        pressArticle.setUpdated(Timestamp.valueOf(LocalDateTime.now()));
+        pressArticle2.setUpdated(Timestamp.valueOf(LocalDateTime.now()));
+        // given
+        given(pressArticleRepository.getPressArticle(6L))
+                .willReturn(pressArticle);
+
+        // when
+        MockHttpServletResponse response = mvc.perform(
+                        get("/pressArticle/6")
+                                .accept(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse();
+
+        /**
+         *
+         * @author kamil
+         * Testy wyszły poprawnie, ale w tym momencie Builder Linków z PressArticleController powoduje błąd.
+         */
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(
+                jsonPressArticle.write(pressArticle2).getJson()
+        );
+    }
+
+    @Test
+    public void canCreateANewPressArticle() throws Exception {
+        PressArticle pressArticle = new PressArticle();
+        pressArticle.setId(6L);
         pressArticle.setTitle("News");
         pressArticle.setContents("Contains of Title");
         pressArticle.setPublicationdate(Timestamp.valueOf(LocalDateTime.now()));
@@ -44,39 +108,15 @@ class PressArticleControllerTest {
         pressArticle.setAuthorlastname("Urbanik");
         pressArticle.setCreated(Timestamp.valueOf(LocalDateTime.now()));
         pressArticle.setUpdated(Timestamp.valueOf(LocalDateTime.now()));
-        List<PressArticle> pressArticleList = new ArrayList<>();
-        pressArticleList.add(pressArticle);
-        return pressArticleList;
+
+        // when
+        MockHttpServletResponse response = mvc.perform(
+                post("/pressArticle").contentType(MediaType.APPLICATION_JSON).content(
+                        jsonPressArticle.write(pressArticle).getJson()
+                )).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED.value());
     }
 
-    @Test
-    void getAllPressArticles() throws Exception {
-        Mockito.when(pressArticleService.getAllPressArticles()).thenReturn(beforeAllTests());
-        mockMvc.perform(get("/pressArticles")).andExpect(status().isOk()).andExpect(jsonPath("$", Matchers.hasSize(1)))
-                .andExpect(jsonPath("$[0].title", Matchers.equalTo("News")));
-    }
-
-    @Test
-    void getAllPressArticlesByKeyWord() {
-    }
-
-    @Test
-    void createPressArticle() throws Exception {
-        Mockito.when(pressArticleService.createPressArticle(ArgumentMatchers.any())).thenReturn((PressArticle) beforeAllTests());
-        String json = mapper.writeValueAsString(beforeAllTests());
-        mockMvc.perform(post("/pressArticle").contentType(MediaType.APPLICATION_JSON).characterEncoding("utf-8")
-                        .content(json).accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", Matchers.equalTo(2)))
-                .andExpect(jsonPath("$.title", Matchers.equalTo("News")));
-    }
-
-    @Test
-    void updatePressArticle() throws Exception {
-        Mockito.when(pressArticleService.getPressArticle(ArgumentMatchers.any())).thenReturn((PressArticle) beforeAllTests());
-        String json = mapper.writeValueAsString(beforeAllTests());
-        mockMvc.perform(put("/pressArticle/2").contentType(MediaType.APPLICATION_JSON).characterEncoding("utf-8")
-                        .content(json).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", Matchers.equalTo(2)))
-                .andExpect(jsonPath("$.title", Matchers.equalTo("News")));
-    }
 }
