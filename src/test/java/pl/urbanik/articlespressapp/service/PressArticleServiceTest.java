@@ -55,9 +55,8 @@ class PressArticleServiceTest {
         pressArticle.setUpdated(Timestamp.valueOf(LocalDateTime.now()));
         pressArticleService.createPressArticle(pressArticle);
 
-        PressArticle pressArticleTest = pressArticleService.getPressArticle(pressArticle.getId());
-        pressArticleTest.setAuthorfirstname("Maciek");
-        PressArticle updatedArticle = pressArticleService.updatePressArticle(pressArticleTest);
+        pressArticle.setAuthorfirstname("Maciek");
+        PressArticle updatedArticle = pressArticleService.updatePressArticle(pressArticle);
         assertEquals("Maciek", updatedArticle.getAuthorfirstname());
     }
 

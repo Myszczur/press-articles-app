@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.ui.Model;
 import pl.urbanik.articlespressapp.model.PressArticle;
+import pl.urbanik.articlespressapp.model.PressArticleDto;
 import pl.urbanik.articlespressapp.repository.PressArticleRepository;
 import pl.urbanik.articlespressapp.service.PressArticleService;
 
@@ -88,7 +89,7 @@ class PressArticleControllerTest {
         /**
          *
          * @author kamil
-         * Testy wyszły poprawnie, ale w tym momencie Builder Linków z PressArticleController powoduje błąd.
+         * Testy wyszły poprawnie, ale w tym momencie Builder Linków z PressArticleController powoduje błędy.
          */
 
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
@@ -99,20 +100,20 @@ class PressArticleControllerTest {
 
     @Test
     public void canCreateANewPressArticle() throws Exception {
-        PressArticle pressArticle = new PressArticle();
-        pressArticle.setId(6L);
-        pressArticle.setTitle("News");
-        pressArticle.setContents("Contains of Title");
-        pressArticle.setPublicationdate(Timestamp.valueOf(LocalDateTime.now()));
-        pressArticle.setAuthorfirstname("Kamil");
-        pressArticle.setAuthorlastname("Urbanik");
-        pressArticle.setCreated(Timestamp.valueOf(LocalDateTime.now()));
-        pressArticle.setUpdated(Timestamp.valueOf(LocalDateTime.now()));
+        PressArticle pressArticleDto = new PressArticle();
+        pressArticleDto.setTitle("News");
+        pressArticleDto.setContents("Contains of Title");
+        pressArticleDto.setPublicationdate(Timestamp.valueOf(LocalDateTime.now()));
+        pressArticleDto.setAuthorfirstname("Kamil");
+        pressArticleDto.setAuthorlastname("Urbanik");
+        pressArticleDto.setCreated(Timestamp.valueOf(LocalDateTime.now()));
+        pressArticleDto.setUpdated(Timestamp.valueOf(LocalDateTime.now()));
+
 
         // when
         MockHttpServletResponse response = mvc.perform(
-                post("/pressArticle").contentType(MediaType.APPLICATION_JSON).content(
-                        jsonPressArticle.write(pressArticle).getJson()
+                post("/pressArticle/").contentType(MediaType.APPLICATION_JSON).content(
+                        jsonPressArticle.write(pressArticleDto).getJson()
                 )).andReturn().getResponse();
 
         // then
